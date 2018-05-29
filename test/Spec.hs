@@ -3,6 +3,10 @@ import Test.QuickCheck
 import Sorting
 import Graph
 import Data.List (sort)
+import BottomUpMergeSort
+import qualified Sortable as SRT
+
+bmsSort = SRT.sort . (SRT.fromList :: Ord a => [a] -> MergeSort a)
 
 main :: IO ()
 main = hspec $ do {
@@ -15,7 +19,12 @@ main = hspec $ do {
         it "quickSort is idempotent" $
             quickSort(quickSort [3,5,1,2]) `shouldBe` quickSort [3,5,1,2];
         it "quickSort sorts correctly" $ property $
-            \a -> quickSort a == sort (a::[Int])
+            \a -> quickSort a == sort (a::[Int]);
+
+        it "bottomUpMergeSort is idempotent" $
+            bmsSort (bmsSort  [3,5,1,2]) `shouldBe` bmsSort [3,5,1,2];
+        it "bottomUpMergeSort sorts correctly" $ property $
+            \a -> bmsSort a == sort (a::[Int])
     };
 
     let g =(graphFromList [(1,2),(2,3),(1,3),(3,4)]) in
