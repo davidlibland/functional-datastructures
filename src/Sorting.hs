@@ -6,8 +6,10 @@ mergeSort [] = []
 mergeSort [x] = [x]
 mergeSort l = merge s1 s2
     where
-        (s1, s2) = both %~ mergeSort $ splitAt half l
-        half = (((length l) + 1) `div` 2)
+        (s1, s2) = both %~ mergeSort $ halve l
+        halve [] = ([], [])
+        halve [x] = ([x],[])
+        halve (x:y:zs) = (x:xs, y:ys) where (xs, ys) = halve zs
         merge s [] = s
         merge [] s = s
         merge sl@(hl:tl) sr@(hr:tr) = if hl < hr
