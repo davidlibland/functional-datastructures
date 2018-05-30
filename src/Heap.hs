@@ -21,10 +21,14 @@ class Heap h where
     heapify [] = empty
     heapify [x] = insert x empty
     heapify l = merge h1 h2 where
-        (h1, h2) = over both heapify $ splitAt half l
-        half = (((length l) + 1) `div` 2)
+        (h1, h2) = over both heapify $ halve l
 
     toList :: Ord a => h a -> [a]
     toList h = case pop h of
         Just (e, h') -> e:(toList h')
         Nothing -> []
+
+halve :: [a] -> ([a], [a])
+halve [] = ([], [])
+halve [x] = ([x],[])
+halve (x:y:zs) = (x:xs, y:ys) where (xs, ys) = halve zs
