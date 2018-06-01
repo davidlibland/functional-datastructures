@@ -10,6 +10,7 @@ import LeftistHeap
 import PairingHeap
 import SplayHeap
 import BinomialHeap
+import SkewBinomialHeap
 import qualified RandomAccessList as RAL
 import qualified BinaryRandomAccessList as BRAL
 import qualified SkewBinaryRandomAccessList as SBRAL
@@ -34,6 +35,7 @@ main = ((=<<) defaultMain) $ traverse id [
         benchHeap "PairingHeap" n (Heap.empty::PairingHeap Int),
         benchHeap "SplayHeap" n (Heap.empty::SplayHeap Int),
         benchHeap "BinomialHeap" n (Heap.empty::BinomialHeap Int),
+        benchHeap "SkewBinomialHeap" n (Heap.empty::SkewBinomialHeap Int),
 
         benchRAL "BinaryRandomAccessList" n (RAL.empty :: BRAL.BinaryList Int),
         benchRAL "SkewBinaryRandomAccessList" n (RAL.empty :: SBRAL.RList Int)
