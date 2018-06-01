@@ -20,10 +20,10 @@ newtype BinomialHeap a = BH [BinomialTree a]
 
 insertTree :: Ord a => BinomialTree a -> [BinomialTree a] -> [BinomialTree a]
 insertTree t [] = [t]
-insertTree t (t':ts)
-    | t^.rank < t'^.rank = (t:t':ts)
-    | t^.rank > t'^.rank = (t':(insertTree t ts))
-    | otherwise = ((link t t'):ts)
+insertTree t ts@(t':ts')
+    | t^.rank < t'^.rank = (t:ts)
+    | t^.rank > t'^.rank = error "improper insertion order"
+    | otherwise = insertTree (link t t') ts'
 
 popMinTree :: Ord a => [BinomialTree a] ->
     Maybe (BinomialTree a, [BinomialTree a])
@@ -34,13 +34,19 @@ popMinTree (t:ts) = case popMinTree ts of
         then Just (t, ts)
         else Just (t', t:ts')
 
+mrg :: Ord a => [BinomialTree a] -> [BinomialTree a] -> [BinomialTree a]
+mrg [] h = h
+mrg h [] = h
+mrg  ts1@(t1:ts1')  ts2@(t2:ts2')
+    | t1^.rank < t2^.rank = t1:mrg ts1' ts2
+    | t2^.rank < t1^.rank = t2:mrg ts1 ts2'
+    | otherwise = insertTree (link t1 t2) (mrg ts1' ts2')
+
 instance Heap BinomialHeap where
     empty = BH []
     isEmpty (BH l) = null l
 
-    merge (BH []) h = h
-    merge (BH (t:ts)) (BH l) =
-        merge (BH ts) $ BH (insertTree t l)
+    merge (BH h1) (BH h2) = BH $ mrg h1 h2
 
     insert x (BH l) = BH (insertTree t l)
         where
