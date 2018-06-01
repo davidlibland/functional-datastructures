@@ -46,6 +46,9 @@ instance Heap SplayHeap where
         Nothing -> Just (x, b)
         Just (y, c) -> Just (y, T c x b)
 
+    toList E = []
+    toList (T l x r) = (toList l) ++ [x] ++ (toList r)
+
 instance Ord c => Set SplayHeap c where
     member x E = False
     member x (T a y b)

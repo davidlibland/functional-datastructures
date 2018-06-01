@@ -11,6 +11,7 @@ import qualified SkewBinaryRandomAccessList as SBRAL
 import qualified RandomAccessList as RAL
 import qualified Heap
 import qualified LeftistHeap as LH
+import qualified SplayHeap as SH
 import qualified BinomialHeap as BH
 import qualified SkewBinomialHeap as SBH
 
@@ -37,6 +38,7 @@ main = hspec $ do {
         (RAL.empty :: SBRAL.RList Int);
 
     heapTests "LeftistHeap" (Heap.empty :: LH.LeftistHeap Int);
+    heapTests "SplayHeap" (Heap.empty :: SH.SplayHeap Int);
     heapTests "BinomialHeap" (Heap.empty :: BH.BinomialHeap Int);
     heapTests "SkewBinomialHeap" (Heap.empty :: SBH.SkewBinomialHeap Int);
 }
