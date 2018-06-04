@@ -14,6 +14,7 @@ import SkewBinomialHeap
 import qualified RandomAccessList as RAL
 import qualified BinaryRandomAccessList as BRAL
 import qualified SkewBinaryRandomAccessList as SBRAL
+import qualified ZerolessBinaryRandomAccessList as ZBRAL
 import Control.Lens (traverse)
 import Data.Maybe (fromJust)
 
@@ -38,7 +39,9 @@ main = ((=<<) defaultMain) $ traverse id [
         benchHeap "SkewBinomialHeap" n (Heap.empty::SkewBinomialHeap Int),
 
         benchRAL "BinaryRandomAccessList" n (RAL.empty :: BRAL.BinaryList Int),
-        benchRAL "SkewBinaryRandomAccessList" n (RAL.empty :: SBRAL.RList Int)
+        benchRAL "SkewBinaryRandomAccessList" n (RAL.empty :: SBRAL.RList Int),
+        benchRAL "ZerolessBinaryRandomAccessList" n (RAL.empty :: ZBRAL.RList
+        Int)
     ]
 
 benchSort :: String -> Int -> ([Int] -> [Int]) -> IO Benchmark
