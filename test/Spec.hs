@@ -16,6 +16,7 @@ import qualified SplayHeap as SH
 import qualified PairingHeap as PH
 import qualified BinomialHeap as BH
 import qualified SkewBinomialHeap as SBH
+import qualified BootstrapHeap as BSH
 
 bmsSort = SRT.sort . (SRT.fromList :: Ord a => [a] -> MergeSort a)
 
@@ -45,6 +46,8 @@ main = hspec $ do {
     heapTests "PairingHeap" (Heap.empty :: PH.PairingHeap Int);
     heapTests "BinomialHeap" (Heap.empty :: BH.BinomialHeap Int);
     heapTests "SkewBinomialHeap" (Heap.empty :: SBH.SkewBinomialHeap Int);
+    heapTests "Bootstrap SkewBinomialHeap"
+        (Heap.empty :: BSH.BootstrapHeap SBH.SkewBinomialHeap Int);
 }
 
 sortingTests :: String -> ([Int] -> [Int]) -> Spec
