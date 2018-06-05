@@ -11,6 +11,7 @@ import PairingHeap
 import SplayHeap
 import BinomialHeap
 import SkewBinomialHeap
+import qualified BootstrapHeap as BSH
 import qualified RandomAccessList as RAL
 import qualified BinaryRandomAccessList as BRAL
 import qualified SkewBinaryRandomAccessList as SBRAL
@@ -24,6 +25,8 @@ test :: Int -> IO [Int]
 test n = id $! sequence $ replicate n $ randomRIO (-100,100::Int)
 
 n = 1000
+m = 100
+k = 100
 
 -- Our benchmark harness.
 main = ((=<<) defaultMain) $ traverse id [
@@ -32,11 +35,13 @@ main = ((=<<) defaultMain) $ traverse id [
         benchSort "bottomUpMergeSort" n bmsSort,
         benchSort "preludeSort" n Data.List.sort,
 
-        benchHeap "LeftistHeap" n (Heap.empty::LeftistHeap Int),
-        benchHeap "PairingHeap" n (Heap.empty::PairingHeap Int),
-        benchHeap "SplayHeap" n (Heap.empty::SplayHeap Int),
-        benchHeap "BinomialHeap" n (Heap.empty::BinomialHeap Int),
-        benchHeap "SkewBinomialHeap" n (Heap.empty::SkewBinomialHeap Int),
+        benchHeap "LeftistHeap" n m k (Heap.empty::LeftistHeap Int),
+        benchHeap "PairingHeap" n m k (Heap.empty::PairingHeap Int),
+        benchHeap "SplayHeap" n m k (Heap.empty::SplayHeap Int),
+        benchHeap "BinomialHeap" n m k (Heap.empty::BinomialHeap Int),
+        benchHeap "SkewBinomialHeap" n m k (Heap.empty::SkewBinomialHeap Int),
+        benchHeap "BootstrapSkewBinomialHeap" n m k
+            (Heap.empty::BSH.BootstrapHeap SkewBinomialHeap Int),
 
         benchRAL "BinaryRandomAccessList" n (RAL.empty :: BRAL.BinaryList Int),
         benchRAL "SkewBinaryRandomAccessList" n (RAL.empty :: SBRAL.RList Int),
@@ -51,8 +56,9 @@ benchSort name n sorter = do{
         testList
 }
 
-benchHeap :: Heap.Heap h => String -> Int -> h Int -> IO Benchmark
-benchHeap name n emptyH = do{
+benchHeap :: Heap.Heap h => String -> Int -> Int -> Int ->  h Int
+    -> IO Benchmark
+benchHeap name n m k emptyH = do{
     testList1 <- test n;
     testList2 <- test n;
     testList3i <- test n;
@@ -61,6 +67,7 @@ benchHeap name n emptyH = do{
     testList5 <- test n;
     testList6i <- test n;
     testList6m <- test n;
+    testLists <- traverse id (map test $ take k $ repeat n);
     let
         insertManyS xs = id $! foldr Heap.insert emptyH xs
         heapifyS xs = id $! Heap.merge (Heap.heapify xs) emptyH
@@ -74,16 +81,23 @@ benchHeap name n emptyH = do{
         mergeS x = id $! Heap.merge testHeap4 x
         iHeapSort xs = id $! Heap.toList $ insertManyS xs
         mHeapSort xs = id $! Heap.toList $ heapifyS xs
+        testHeaps = map insertManyS testLists
+        mergeAll hs = id $! foldr Heap.merge emptyH hs
+        mergeDesc = "merge " ++ (show k) ++ " heaps of size " ++ (show m)
+        sizeDesc = " of size " ++ (show n)
     in return $ bgroup
-        (name ++ " of size " ++ (show n)) [
-            bench "insert"  $ whnf insertManyS testList1,
-            bench "heapify (binary merge)"  $ whnf heapifyS testList2,
-            bench "toList from insertion"  $ nf Heap.toList testHeap3i,
-            bench "toList from binary merge"  $ nf Heap.toList testHeap3m,
-            bench "deleteMin"  $ whnf deleteMany testHeap4,
-            bench "merge"  $ whnf mergeS testHeap5,
-            bench "insertion heapSort" $ nf iHeapSort testList6i,
-            bench "binary merge heapSort" $ nf mHeapSort testList6m
+        (name) [
+            bench ("insert from list" ++ sizeDesc) $ whnf insertManyS testList1,
+            bench ("heapify (binary merge)" ++ sizeDesc) $ whnf heapifyS testList2,
+            bench ("toList from insertion" ++ sizeDesc) $ nf Heap.toList
+                testHeap3i,
+            bench ("toList from binary merge" ++ sizeDesc) $ nf Heap.toList
+                testHeap3m,
+            bench ("deleteMin" ++ sizeDesc) $ whnf deleteMany testHeap4,
+            bench mergeDesc $ whnf mergeAll testHeaps,
+            bench ("insertion heapSort" ++ sizeDesc) $ nf iHeapSort testList6i,
+            bench ("binary merge heapSort" ++ sizeDesc) $ nf mHeapSort
+                testList6m
         ]
     }
 
